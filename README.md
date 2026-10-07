@@ -9,4 +9,4 @@ Also kOS got deleted.. (whoops) So im revamping this.
 
 How to use? Use ai to like find code for your console that will read the RAW link
 every minute* (*for creator/upd notif) and for motd read the message raw link and
-put it in the console. (clone this repo on your own profile too)
+put it in the console. (install the repo on your own profile else I will control motd/notif)
