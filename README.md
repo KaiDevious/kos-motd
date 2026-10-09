@@ -1,37 +1,84 @@
-Hey! If your looking at this JUST know-
+# Broadcast MOTD + Notify
 
-This is NOT kOS. This is the custom service to send update/creator notifs and motds (message of the day) for Konsole.
+A tiny, open-source service that lets **any Linux distro or setup** broadcast two things from a single GitHub repo:
 
-Just note that the base is Kali Linux.
+- 📜 a **message of the day** shown in the terminal, and
+- 🔔 **desktop pop-up notifications** (updates, announcements, whatever).
 
-kOS hasnt been posted on this day (oct 8 2026) so just wait
-Also kOS got deleted.. (whoops) So im revamping this.
+Edit a text file in your repo, commit, and every machine running the service sees it within a minute. No server, no backend — just GitHub and a couple of shell scripts.
 
-How to use? 
-For bash users:
-echo 'curl -fsS --max-time 2 "https://raw.githubusercontent.com/yourprofile/your-motd-notif-sender/refs/heads/main/message.txt?t=$(date +%s)" 2>/dev/null; echo' >> ~/.bashrc
-For zsh users:
-echo 'curl -fsS --max-time 2 "https://raw.githubusercontent.com/yourprofile/your-motd-notif-sender/refs/heads/main/message.txt?t=$(date +%s)" 2>/dev/null; echo' >> ~/.zshrc
-Update/Creator notifs?
+> Originally built for **kOS** (a custom Kali-based distro), but it's distro-agnostic — use it for your own OS, homelab, classroom, team, anything.
+
+## How it works
+Each machine quietly fetches the raw text of two files on a timer:
+- **`message.txt`** → shown in the terminal when it opens.
+- **`notify.txt`** → shown as a desktop pop-up when it changes.
+
+To broadcast, you just edit those files and commit. That's it.
+
+## Make it yours (2 steps)
+1. **Fork this repo** (or copy `message.txt` and `notify.txt` into your own). This matters — if you point the scripts at *my* repo, *I* control your messages. Use your own so **you** do.
+2. In the commands below, replace:
+   - `YOURUSER/YOURREPO` → your repo
+   - `MyOS` → whatever you want the notification title to say
+
+## Setup
+
+### 1. Message of the day (terminal)
+**bash:**
+```bash
+echo 'curl -fsS --max-time 2 "https://raw.githubusercontent.com/YOURUSER/YOURREPO/refs/heads/main/message.txt?t=$(date +%s)" 2>/dev/null; echo' >> ~/.bashrc
+```
+**zsh:**
+```bash
+echo 'curl -fsS --max-time 2 "https://raw.githubusercontent.com/YOURUSER/YOURREPO/refs/heads/main/message.txt?t=$(date +%s)" 2>/dev/null; echo' >> ~/.zshrc
+```
+
+### 2. Desktop notifications (checks every minute)
+```bash
 mkdir -p ~/.local/bin ~/.config/autostart ~/.cache
-cat > ~/.local/bin/kos-notify.sh << 'EOF'
+
+cat > ~/.local/bin/broadcast-notify.sh << 'EOF'
 #!/bin/bash
-URL="https://raw.githubusercontent.com/yourprofile/your-motd-notif-sender/refs/heads/main/notify.txt"
-STATE="$HOME/.cache/youros-last-notify"
+NAME="MyOS"   # <-- change to your OS / project name
+URL="https://raw.githubusercontent.com/YOURUSER/YOURREPO/refs/heads/main/notify.txt"
+STATE="$HOME/.cache/broadcast-last-notify"
 sleep 15
 while true; do
   MSG=$(curl -fsS --max-time 5 "$URL?t=$(date +%s)" 2>/dev/null)
   if [ -n "$MSG" ] && [ "$MSG" != "$(cat "$STATE" 2>/dev/null)" ]; then
-    notify-send "kOS" "$MSG"
+    notify-send "$NAME" "$MSG"
     echo "$MSG" > "$STATE"
   fi
   sleep 60
 done
 EOF
-chmod +x ~/.local/bin/kos-notify.sh
-cat > ~/.config/autostart/kos-notify.desktop << 'EOF'
+chmod +x ~/.local/bin/broadcast-notify.sh
+
+cat > ~/.config/autostart/broadcast-notify.desktop << EOF
 [Desktop Entry]
 Type=Application
-Exec=/home/REPLACE_ME/.local/bin/youros-notify.sh
-Name=[your os here] Notify
+Exec=$HOME/.local/bin/broadcast-notify.sh
+Name=Broadcast Notify
 EOF
+```
+Then **log out and back in** — it runs automatically from then on.
+
+## Sending a broadcast
+Edit the file on GitHub (or `git push` a change) and commit:
+- change **`message.txt`** → updates everyone's terminal greeting
+- change **`notify.txt`** → pops up a notification on everyone's desktop
+
+## Tips
+- Keep messages to **one line** so they look clean.
+- Avoid quotes (`"` / `'`) in messages — they can break the display.
+- Changes take up to ~1 minute to reach everyone (GitHub caches raw files briefly). The `?t=...` on the URL busts that cache.
+
+## Requirements
+- `curl` (preinstalled on most systems)
+- `notify-send` for pop-ups (`libnotify-bin` on Debian/Ubuntu/Kali) — only needed for notifications, not the MOTD.
+
+## License
+MIT — free to use, fork, and modify. Originally made by **Kai** for kOS. 💙
+
+YES THIS WAS WRITTEN WITH AI IM LAZY AF
