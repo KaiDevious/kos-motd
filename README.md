@@ -2,9 +2,9 @@ Hey! If your looking at this JUST know-
 
 This is NOT kOS. This is the custom service to send update/creator notifs and motds (message of the day) for Konsole.
 
-Just note that the base is Kubuntu.
+Just note that the base is Kali Linux.
 
-kOS hasnt been posted on this day (oct 5 2026) so just wait
+kOS hasnt been posted on this day (oct 8 2026) so just wait
 Also kOS got deleted.. (whoops) So im revamping this.
 
 How to use? Use ai to like find code for your console that will read the RAW link
